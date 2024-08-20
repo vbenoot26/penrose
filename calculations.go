@@ -3,14 +3,28 @@ package main
 import "math"
 
 func drawPolygons() []polygon {
-	dartTransforms, kiteTransforms := dartReplace()
+	dartTransforms, kiteTransforms := kiteReplace(transformation{0, coordinate{0, 0}, 0})
+
+	newDartTransforms, newKiteTransforms := []transformation{}, []transformation{}
+
+	for _, dartTrans := range dartTransforms {
+		tempDartTranses, tempKiteTranses := dartReplace(dartTrans)
+		newDartTransforms = append(newDartTransforms, tempDartTranses...)
+		newKiteTransforms = append(newKiteTransforms, tempKiteTranses...)
+	}
+
+	for _, kiteTrans := range kiteTransforms {
+		tempDartTranses, tempKiteTranses := kiteReplace(kiteTrans)
+		newDartTransforms = append(newDartTransforms, tempDartTranses...)
+		newKiteTransforms = append(newKiteTransforms, tempKiteTranses...)
+	}
 
 	result := []polygon{}
-	for _, trans := range dartTransforms {
+	for _, trans := range newDartTransforms {
 		result = append(result, dart.applyTransformation(trans))
 	}
 
-	for _, trans := range kiteTransforms {
+	for _, trans := range newKiteTransforms {
 		result = append(result, kite.applyTransformation(trans))
 	}
 
@@ -29,6 +43,7 @@ func kiteReplace(trans transformation) ([]transformation, []transformation) {
 		{6, kiteTranslate1.scale(trans.rescales), 1},
 		{-6, kiteTranslate2.scale(trans.rescales), 1},
 	}
+
 	kiteReplaceTrans := []transformation{}
 	for _, kiteTrans := range basicKiteReplace {
 		kiteReplaceTrans = append(kiteReplaceTrans, combineTransform(trans, kiteTrans))
@@ -37,14 +52,25 @@ func kiteReplace(trans transformation) ([]transformation, []transformation) {
 	return DartReplace, kiteReplaceTrans
 }
 
-func dartReplace() ([]transformation, []transformation) {
+func dartReplace(trans transformation) ([]transformation, []transformation) {
 	dartAngle := 3 * radian36
 
-	return []transformation{
-			{3, coordinate{scaleFactor * (1 - math.Cos(dartAngle)), scaleFactor * -math.Sin(dartAngle)}, 1},
-			{-3, coordinate{scaleFactor * (1 - math.Cos(-dartAngle)), scaleFactor * -math.Sin(-dartAngle)}, 1},
-		}, []transformation{
-			{1, coordinate{0, 0}, 1},
-			{-1, coordinate{0, 0}, 1},
-		}
+	dartTrans1 := coordinate{1 - math.Cos(dartAngle), -math.Sin(dartAngle)}
+	dartTrans2 := coordinate{1 - math.Cos(-dartAngle), -math.Sin(-dartAngle)}
+
+	basicDartTrans := []transformation{
+		{3, dartTrans1.scale(trans.rescales + 1), 1},
+		{-3, dartTrans2.scale(trans.rescales + 1), 1},
+	}
+
+	dartTranses := []transformation{}
+	for _, dartTrans := range basicDartTrans {
+		dartTranses = append(dartTranses, combineTransform(trans, dartTrans))
+	}
+
+	return dartTranses, []transformation{
+		combineTransform(trans, transformation{1, coordinate{0, 0}, 1}),
+		combineTransform(trans, transformation{-1, coordinate{0, 0}, 1}),
+	}
 }
+
