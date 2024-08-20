@@ -17,55 +17,24 @@ func drawPolygons() []polygon {
 	return result
 }
 
-func (shape *polygon) applyTransformation(transform transformation) polygon {
-	newPoints := []coordinate{}
-	for _, coord := range shape.points {
-		newPoint := applyTransformation(coord, transform)
-		newPoints = append(newPoints, newPoint)
-	}
-	return polygon{newPoints}
-}
+func kiteReplace(trans transformation) ([]transformation, []transformation) {
+	kiteTranslate1 := coordinate{math.Cos(radian36), math.Sin(radian36)}
+	kiteTranslate2 := coordinate{math.Cos(radian36), -math.Sin(radian36)}
 
-func applyTransformation(coord coordinate, transform transformation) coordinate {
-	// rescales
-	rescale := math.Pow(scaleFactor, float64(transform.rescales))
-	newCoord := coordinate{
-		coord.x * rescale,
-		coord.y * rescale,
+	DartReplace := []transformation{
+		combineTransform(trans, transformation{0, coordinate{0, 0}, 1}),
 	}
 
-	// rotation
-	angle := float64(transform.amountOfRotation) * radian36
-	rotationMatrix := [][]float64{
-		{math.Cos(angle), -math.Sin(angle)},
-		{math.Sin(angle), math.Cos(angle)},
+	basicKiteReplace := []transformation{
+		{6, kiteTranslate1.scale(trans.rescales), 1},
+		{-6, kiteTranslate2.scale(trans.rescales), 1},
+	}
+	kiteReplaceTrans := []transformation{}
+	for _, kiteTrans := range basicKiteReplace {
+		kiteReplaceTrans = append(kiteReplaceTrans, combineTransform(trans, kiteTrans))
 	}
 
-	newCoord = matrixTransform(newCoord, rotationMatrix)
-
-	// translation
-	newCoord = coordinate{
-		newCoord.x + transform.translation.x,
-		newCoord.y + transform.translation.y,
-	}
-
-	return newCoord
-}
-
-func matrixTransform(coord coordinate, matrix [][]float64) coordinate {
-	return coordinate{
-		coord.x*matrix[0][0] + coord.y*matrix[0][1],
-		coord.x*matrix[1][0] + coord.y*matrix[1][1],
-	}
-}
-
-func kiteReplace() ([]transformation, []transformation) {
-	return []transformation{
-			{0, coordinate{0, 0}, 1},
-		}, []transformation{
-			{6, coordinate{math.Cos(radian36), math.Sin(radian36)}, 1},
-			{-6, coordinate{math.Cos(radian36), -math.Sin(radian36)}, 1},
-		}
+	return DartReplace, kiteReplaceTrans
 }
 
 func dartReplace() ([]transformation, []transformation) {
