@@ -10,35 +10,47 @@ import (
 var width = 1000
 var heigth = 1000
 
+type coordinate struct {
+	x float64
+	y float64
+}
+
 func main() {
 	canvas := svg.New(os.Stdout)
 	canvas.Start(width, heigth)
 
-	pointsx, pointsy := getDartCoords()
+	coords := getDartCoords()
 
-	canvas.Polygon(toCoordArray(pointsx), toCoordArray(pointsy), "fill:lightblue;stroke:black;stroke-width:2")
+	canvas.Polygon(getXCoords(coords), getYCoords(coords), "fill:lightblue;stroke:black;stroke-width:2")
 
 	canvas.End()
 }
 
-func getDartCoords() ([]float64, []float64) {
+func getDartCoords() []coordinate {
 	radian36 := math.Pi / 5
 
-	pointsx := []float64{
-		0, math.Cos(radian36), 1, math.Cos(radian36),
+	return []coordinate{
+		coordinate{0, 0},
+		coordinate{math.Cos(radian36), math.Sin(radian36)},
+		coordinate{1, 0},
+		coordinate{math.Cos(radian36), -math.Sin(radian36)},
 	}
-
-	pointsy := []float64{
-		0, math.Sin(radian36), 0, -math.Sin(radian36),
-	}
-
-	return pointsx, pointsy
 }
 
-func toCoordArray(floatArr []float64) []int {
+func getXCoords(coordinates []coordinate) []int {
 	result := []int{}
-	for _, num := range floatArr {
-		result = append(result, int((num*500)+500))
+	for _, coord := range coordinates {
+		x := coord.x
+		result = append(result, int((x*500)+500))
+	}
+	return result
+}
+
+func getYCoords(coordinates []coordinate) []int {
+	result := []int{}
+	for _, coord := range coordinates {
+		y := coord.y
+		result = append(result, int((y*500)+500))
 	}
 	return result
 }
