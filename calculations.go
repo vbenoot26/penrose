@@ -3,7 +3,7 @@ package main
 import "math"
 
 func drawPolygons() []polygon {
-	dartTransforms, kiteTransforms := kiteReplace()
+	dartTransforms, kiteTransforms := dartReplace()
 
 	result := []polygon{}
 	for _, trans := range dartTransforms {
@@ -68,28 +68,14 @@ func kiteReplace() ([]transformation, []transformation) {
 		}
 }
 
-func dartReplace() []polygon {
+func dartReplace() ([]transformation, []transformation) {
 	dartAngle := 3 * radian36
-	return []polygon{
-		kite.applyTransformation(transformation{
-			1,
-			coordinate{0, 0},
-			1,
-		}),
-		kite.applyTransformation(transformation{
-			-1,
-			coordinate{0, 0},
-			1,
-		}),
-		dart.applyTransformation(transformation{
-			3,
-			coordinate{scaleFactor * (1 - math.Cos(dartAngle)), scaleFactor * -math.Sin(dartAngle)},
-			1,
-		}),
-		dart.applyTransformation(transformation{
-			-3,
-			coordinate{scaleFactor * (1 - math.Cos(-dartAngle)), scaleFactor * -math.Sin(-dartAngle)},
-			1,
-		}),
-	}
+
+	return []transformation{
+			{3, coordinate{scaleFactor * (1 - math.Cos(dartAngle)), scaleFactor * -math.Sin(dartAngle)}, 1},
+			{-3, coordinate{scaleFactor * (1 - math.Cos(-dartAngle)), scaleFactor * -math.Sin(-dartAngle)}, 1},
+		}, []transformation{
+			{1, coordinate{0, 0}, 1},
+			{-1, coordinate{0, 0}, 1},
+		}
 }
