@@ -13,20 +13,10 @@ func (shape *polygon) applyTransformation(transform transformation) polygon {
 
 func applyTransformation(coord coordinate, transform transformation) coordinate {
 	// rescales
-	rescale := math.Pow(scaleFactor, float64(transform.rescales))
-	newCoord := coordinate{
-		coord.x * rescale,
-		coord.y * rescale,
-	}
+	newCoord := coord.scale(transform.rescales)
 
 	// rotation
-	angle := float64(transform.amountOfRotation) * radian36
-	rotationMatrix := [][]float64{
-		{math.Cos(angle), -math.Sin(angle)},
-		{math.Sin(angle), math.Cos(angle)},
-	}
-
-	newCoord = matrixTransform(newCoord, rotationMatrix)
+	newCoord = newCoord.rotate(transform.amountOfRotation)
 
 	// translation
 	newCoord = coordinate{
@@ -52,9 +42,19 @@ func combineTransform(transFirst transformation, transSecond transformation) tra
 	}
 }
 
-func (coord *coordinate) scale(scaleExp int) coordinate {
+func (coord coordinate) scale(scaleExp int) coordinate {
 	return coordinate{
 		coord.x * math.Pow(scaleFactor, float64(scaleExp)),
 		coord.y * math.Pow(scaleFactor, float64(scaleExp)),
 	}
+}
+
+func (coord coordinate) rotate(rotations int) coordinate {
+	angle := float64(rotations) * radian36
+	rotationMatrix := [][]float64{
+		{math.Cos(angle), -math.Sin(angle)},
+		{math.Sin(angle), math.Cos(angle)},
+	}
+
+	return matrixTransform(coord, rotationMatrix)
 }

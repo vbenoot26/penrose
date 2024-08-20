@@ -40,8 +40,8 @@ func kiteReplace(trans transformation) ([]transformation, []transformation) {
 	}
 
 	basicKiteReplace := []transformation{
-		{6, kiteTranslate1.scale(trans.rescales), 1},
-		{-6, kiteTranslate2.scale(trans.rescales), 1},
+		{6, kiteTranslate1.scale(trans.rescales).rotate(trans.amountOfRotation), 1},
+		{-6, kiteTranslate2.scale(trans.rescales).rotate(trans.amountOfRotation), 1},
 	}
 
 	kiteReplaceTrans := []transformation{}
@@ -59,8 +59,8 @@ func dartReplace(trans transformation) ([]transformation, []transformation) {
 	dartTrans2 := coordinate{1 - math.Cos(-dartAngle), -math.Sin(-dartAngle)}
 
 	basicDartTrans := []transformation{
-		{3, dartTrans1.scale(trans.rescales + 1), 1},
-		{-3, dartTrans2.scale(trans.rescales + 1), 1},
+		{3, dartTrans1.scale(trans.rescales + 1).rotate(trans.amountOfRotation), 1},
+		{-3, dartTrans2.scale(trans.rescales + 1).rotate(trans.amountOfRotation), 1},
 	}
 
 	dartTranses := []transformation{}
