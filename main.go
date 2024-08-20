@@ -4,11 +4,12 @@ import (
 	"math"
 	"os"
 
-	"github.com/ajstarks/svgo"
+	svg "github.com/ajstarks/svgo"
 )
 
 var width = 1000
 var heigth = 1000
+var radian36 = math.Pi / 5
 
 type coordinate struct {
 	x float64
@@ -19,21 +20,26 @@ func main() {
 	canvas := svg.New(os.Stdout)
 	canvas.Start(width, heigth)
 
-	coords := getDartCoords()
-
-	canvas.Polygon(getXCoords(coords), getYCoords(coords), "fill:lightblue;stroke:black;stroke-width:2")
+	canvas.Polygon(getXCoords(getKiteCoords()), getYCoords(getKiteCoords()), "fill:lightblue;stroke:black;stroke-width:2")
 
 	canvas.End()
 }
 
 func getDartCoords() []coordinate {
-	radian36 := math.Pi / 5
-
 	return []coordinate{
-		coordinate{0, 0},
-		coordinate{math.Cos(radian36), math.Sin(radian36)},
-		coordinate{1, 0},
-		coordinate{math.Cos(radian36), -math.Sin(radian36)},
+		{0, 0},
+		{math.Cos(radian36), math.Sin(radian36)},
+		{1, 0},
+		{math.Cos(radian36), -math.Sin(radian36)},
+	}
+}
+
+func getKiteCoords() []coordinate {
+	return []coordinate{
+		{0, 0},
+		{math.Cos(radian36), math.Sin(radian36)},
+		{1 / math.Phi, 0},
+		{math.Cos(radian36), -math.Sin(radian36)},
 	}
 }
 
