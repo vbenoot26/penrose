@@ -11,7 +11,7 @@ import (
 var width = 1000
 var heigth = 1000
 var radian36 = math.Pi / 5
-var scaleFactor = 2 - math.Phi
+var scaleFactor = math.Phi - 1.0
 
 var dart = polygon{
 	[]coordinate{
@@ -57,7 +57,7 @@ func draw(writer http.ResponseWriter, _ *http.Request) {
 	canvas.Start(width, heigth)
 	defer canvas.End()
 
-	for _, shape := range kiteReplace() {
+	for _, shape := range dartReplace() {
 		drawPolygon(canvas, shape)
 	}
 }
@@ -90,7 +90,7 @@ func applyTransformation(coord coordinate, transform transformation) coordinate 
 		{math.Sin(angle), math.Cos(angle)},
 	}
 
-	newCoord = matrixTransform(coord, rotationMatrix)
+	newCoord = matrixTransform(newCoord, rotationMatrix)
 
 	// translation
 	newCoord = coordinate{
@@ -139,6 +139,32 @@ func kiteReplace() []polygon {
 		kite.applyTransformation(transformation{
 			-6 * math.Pi / 5,
 			coordinate{math.Cos(radian36), -math.Sin(radian36)},
+			1,
+		}),
+	}
+}
+
+func dartReplace() []polygon {
+	dartAngle := 3 * radian36
+	return []polygon{
+		kite.applyTransformation(transformation{
+			radian36,
+			coordinate{0, 0},
+			1,
+		}),
+		kite.applyTransformation(transformation{
+			-radian36,
+			coordinate{0, 0},
+			1,
+		}),
+		dart.applyTransformation(transformation{
+			dartAngle,
+			coordinate{scaleFactor * (1 - math.Cos(dartAngle)), scaleFactor * -math.Sin(dartAngle)},
+			1,
+		}),
+		dart.applyTransformation(transformation{
+			-dartAngle,
+			coordinate{scaleFactor * (1 - math.Cos(-dartAngle)), scaleFactor * -math.Sin(-dartAngle)},
 			1,
 		}),
 	}
