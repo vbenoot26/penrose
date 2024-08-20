@@ -1,8 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"math"
-	"os"
+	"net/http"
 
 	svg "github.com/ajstarks/svgo"
 )
@@ -17,7 +18,13 @@ type coordinate struct {
 }
 
 func main() {
-	canvas := svg.New(os.Stdout)
+	http.HandleFunc("/", draw)
+	fmt.Println("Server starting at http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+func draw(writer http.ResponseWriter, _ *http.Request) {
+	canvas := svg.New(writer)
 	canvas.Start(width, heigth)
 
 	canvas.Polygon(getXCoords(getKiteCoords()), getYCoords(getKiteCoords()), "fill:lightblue;stroke:black;stroke-width:2")
