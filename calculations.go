@@ -2,33 +2,45 @@ package main
 
 import "math"
 
-func drawPolygons() []polygon {
-	dartTransforms, kiteTransforms := kiteReplace(transformation{0, coordinate{0, 0}, 0})
+func drawPolygons() ([]polygon, []polygon) {
+	dartTransforms, kiteTransforms := iterate([]transformation{{0, coordinate{0, 0}, 0}}, []transformation{})
+	resultDart, resultKite := []polygon{}, []polygon{}
+	for _, trans := range dartTransforms {
+		resultDart = append(resultDart, dart.applyTransformation(trans))
+	}
 
-	newDartTransforms, newKiteTransforms := []transformation{}, []transformation{}
+	for _, trans := range kiteTransforms {
+		resultKite = append(resultKite, kite.applyTransformation(trans))
+	}
 
-	for _, dartTrans := range dartTransforms {
+	return resultDart, resultKite
+}
+
+var iterations = 0
+
+const maxIterations = 4
+
+func iterate(dartTranses []transformation, kiteTranses []transformation) ([]transformation, []transformation) {
+	if iterations > maxIterations {
+		return dartTranses, kiteTranses
+	}
+	iterations++
+
+	newDartTranses, newKiteTranses := []transformation{}, []transformation{}
+
+	for _, dartTrans := range dartTranses {
 		tempDartTranses, tempKiteTranses := dartReplace(dartTrans)
-		newDartTransforms = append(newDartTransforms, tempDartTranses...)
-		newKiteTransforms = append(newKiteTransforms, tempKiteTranses...)
+		newDartTranses = append(newDartTranses, tempDartTranses...)
+		newKiteTranses = append(newKiteTranses, tempKiteTranses...)
 	}
 
-	for _, kiteTrans := range kiteTransforms {
+	for _, kiteTrans := range kiteTranses {
 		tempDartTranses, tempKiteTranses := kiteReplace(kiteTrans)
-		newDartTransforms = append(newDartTransforms, tempDartTranses...)
-		newKiteTransforms = append(newKiteTransforms, tempKiteTranses...)
+		newDartTranses = append(newDartTranses, tempDartTranses...)
+		newKiteTranses = append(newKiteTranses, tempKiteTranses...)
 	}
 
-	result := []polygon{}
-	for _, trans := range newDartTransforms {
-		result = append(result, dart.applyTransformation(trans))
-	}
-
-	for _, trans := range newKiteTransforms {
-		result = append(result, kite.applyTransformation(trans))
-	}
-
-	return result
+	return iterate(newDartTranses, newKiteTranses)
 }
 
 func kiteReplace(trans transformation) ([]transformation, []transformation) {

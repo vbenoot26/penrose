@@ -57,12 +57,21 @@ func draw(writer http.ResponseWriter, _ *http.Request) {
 	canvas.Start(width, heigth)
 	defer canvas.End()
 
-	for _, shape := range drawPolygons() {
-		drawPolygon(canvas, shape)
+	dartPolys, kitePolys := drawPolygons()
+	for _, shape := range dartPolys {
+		drawDart(canvas, shape)
+	}
+
+	for _, shape := range kitePolys {
+		drawKite(canvas, shape)
 	}
 }
 
-func drawPolygon(canvas *svg.SVG, shape polygon) {
+func drawDart(canvas *svg.SVG, shape polygon) {
+	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:darkblue;stroke:black;stroke-width:2")
+}
+
+func drawKite(canvas *svg.SVG, shape polygon) {
 	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:lightblue;stroke:black;stroke-width:2")
 }
 
