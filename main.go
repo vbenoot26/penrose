@@ -68,11 +68,11 @@ func draw(writer http.ResponseWriter, _ *http.Request) {
 }
 
 func drawDart(canvas *svg.SVG, shape polygon) {
-	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:darkblue;stroke:black;stroke-width:2")
+	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:#1a7a4c;stroke:black;stroke-width:1")
 }
 
 func drawKite(canvas *svg.SVG, shape polygon) {
-	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:lightblue;stroke:black;stroke-width:2")
+	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:#101820;stroke:black;stroke-width:1")
 }
 
 func getXCoords(coordinates []coordinate) []int {

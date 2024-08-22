@@ -58,3 +58,40 @@ func (coord coordinate) rotate(rotations int) coordinate {
 
 	return matrixTransform(coord, rotationMatrix)
 }
+
+func transEquals(trans1 transformation, trans2 transformation) bool {
+	return trans1.amountOfRotation%5 == trans2.amountOfRotation%5 &&
+		trans1.translation.x == trans2.translation.y &&
+		trans1.translation.y == trans2.translation.y
+}
+
+func (result *resultMutex) setResults(dartResults set, kiteResults set) {
+	result.mu.Lock()
+	defer result.mu.Unlock()
+
+	result.dartTransforms = dartResults
+	result.kiteTransforms = kiteResults
+}
+
+func (result *resultMutex) getResults() (set, set) {
+	result.mu.Lock()
+	defer result.mu.Unlock()
+	return result.dartTransforms, result.kiteTransforms
+}
+
+type set struct {
+	items map[transformation]struct{}
+}
+
+func newSet() set {
+	return set{make(map[transformation]struct{})}
+}
+
+func (s *set) add(trans transformation) {
+	s.items[trans] = struct{}{}
+}
+
+func (s *set) contains(trans transformation) bool {
+	_, exists := s.items[trans]
+	return exists
+}

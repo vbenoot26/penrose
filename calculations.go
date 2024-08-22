@@ -4,46 +4,34 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"os"
+	"runtime/pprof"
 	"sync"
 	"time"
 )
 
 var startTime time.Time
 
-const maxSecs = 500 * time.Millisecond
+const maxSecs = 5
 
 type resultMutex struct {
 	mu             sync.Mutex
-	dartTransforms []transformation
-	kiteTransforms []transformation
+	dartTransforms set
+	kiteTransforms set
 }
 
-var result = resultMutex{dartTransforms: []transformation{}, kiteTransforms: []transformation{}}
-
-func (result *resultMutex) setResults(dartResults []transformation, kiteResults []transformation) {
-	result.mu.Lock()
-	defer result.mu.Unlock()
-
-	result.dartTransforms = dartResults
-	result.kiteTransforms = kiteResults
-}
-
-func (result *resultMutex) getResults() ([]transformation, []transformation) {
-	result.mu.Lock()
-	defer result.mu.Unlock()
-	return result.dartTransforms, result.kiteTransforms
-}
+var result = resultMutex{dartTransforms: newSet(), kiteTransforms: newSet()}
 
 func drawPolygons() ([]polygon, []polygon) {
 	startTime = time.Now()
 	dartTransforms, kiteTransforms := calculateDrawing()
 	fmt.Println("Calculated!")
 	resultDart, resultKite := []polygon{}, []polygon{}
-	for _, trans := range dartTransforms {
+	for trans := range dartTransforms.items {
 		resultDart = append(resultDart, dart.applyTransformation(trans))
 	}
 
-	for _, trans := range kiteTransforms {
+	for trans := range kiteTransforms.items {
 		resultKite = append(resultKite, kite.applyTransformation(trans))
 	}
 
@@ -52,14 +40,34 @@ func drawPolygons() ([]polygon, []polygon) {
 
 var iterations = 0
 
-func calculateDrawing() ([]transformation, []transformation) {
+const maxIters = 10
+
+func calculateDrawing() (set, set) {
 	iterations = 0
 
 	ctx, cancel := context.WithTimeout(context.Background(), maxSecs*time.Second)
 	defer cancel()
 
+	darts, kites := newSet(), newSet()
+	darts.add(transformation{0, coordinate{0, 0}, 0})
+
 	go func() {
-		iterate([]transformation{{0, coordinate{0, 0}, 0}}, []transformation{}, ctx)
+		for true {
+			fileName := fmt.Sprintf("profiled%d.pprof", iterations)
+			profile, err := os.Create(fileName)
+			if err != nil {
+				panic(err)
+			}
+			pprof.StartCPUProfile(profile)
+			darts, kites = calculateNextStep(darts, kites)
+			select {
+			case <-ctx.Done():
+				break
+			default:
+				result.setResults(darts, kites)
+			}
+			pprof.StopCPUProfile()
+		}
 	}()
 
 	time.Sleep(maxSecs * time.Second)
@@ -67,52 +75,43 @@ func calculateDrawing() ([]transformation, []transformation) {
 	return result.getResults()
 }
 
-func iterate(dartTranses []transformation, kiteTranses []transformation, ctx context.Context) {
+func calculateNextStep(dartTranses set, kiteTranses set) (set, set) {
 	iterations++
-	fmt.Println(iterations)
 
-	newDartTranses, newKiteTranses := []transformation{}, []transformation{}
+	newDartTranses, newKiteTranses := newSet(), newSet()
 
-	for _, dartTrans := range dartTranses {
+	for dartTrans := range dartTranses.items {
 		tempDartTranses, tempKiteTranses := dartReplace(dartTrans)
 		newDartTranses = addAllNew(newDartTranses, tempDartTranses)
 		newKiteTranses = addAllNew(newKiteTranses, tempKiteTranses)
 	}
 
-	for _, kiteTrans := range kiteTranses {
+	for kiteTrans := range kiteTranses.items {
 		tempDartTranses, tempKiteTranses := kiteReplace(kiteTrans)
 		newDartTranses = addAllNew(newDartTranses, tempDartTranses)
 		newKiteTranses = addAllNew(newKiteTranses, tempKiteTranses)
 	}
 
-	select {
-	case <-ctx.Done():
-		return
-
-	default:
-		result.setResults(newDartTranses, newKiteTranses)
-		iterate(newDartTranses, newKiteTranses, ctx)
-	}
+	return newDartTranses, newKiteTranses
 }
 
-func addAllNew(transes []transformation, toAdd []transformation) []transformation {
-	resultslice := []transformation{}
-	copy(transes, resultslice)
+func addAllNew(transes set, toAdd []transformation) set {
 	for _, temptrans := range toAdd {
-		resultslice = addIfNotContains(resultslice, temptrans)
+		transes.add(temptrans)
 	}
-	return resultslice
+	return transes
 }
 
 func addIfNotContains(transes []transformation, trans transformation) []transformation {
-	resultSlice := []transformation{}
+	resultSlice := make([]transformation, len(transes))
 	copy(resultSlice, transes)
 	for _, tempTrans := range transes {
-		if trans == tempTrans {
+		if transEquals(tempTrans, trans) {
 			return resultSlice
 		}
 	}
-	return append(resultSlice, trans)
+	resultSlice = append(resultSlice, trans)
+	return resultSlice
 }
 
 func kiteReplace(trans transformation) ([]transformation, []transformation) {
