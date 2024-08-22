@@ -36,7 +36,7 @@ func matrixTransform(coord coordinate, matrix [][]float64) coordinate {
 
 func combineTransform(transFirst transformation, transSecond transformation) transformation {
 	return transformation{
-		transFirst.amountOfRotation + transSecond.amountOfRotation,
+		(transFirst.amountOfRotation + transSecond.amountOfRotation) % 10,
 		coordinate{transFirst.translation.x + transSecond.translation.x, transFirst.translation.y + transSecond.translation.y},
 		transFirst.rescales + transSecond.rescales,
 	}
@@ -57,12 +57,6 @@ func (coord coordinate) rotate(rotations int) coordinate {
 	}
 
 	return matrixTransform(coord, rotationMatrix)
-}
-
-func transEquals(trans1 transformation, trans2 transformation) bool {
-	return trans1.amountOfRotation%5 == trans2.amountOfRotation%5 &&
-		trans1.translation.x == trans2.translation.y &&
-		trans1.translation.y == trans2.translation.y
 }
 
 func (result *resultMutex) setResults(dartResults set, kiteResults set) {

@@ -53,7 +53,7 @@ func calculateDrawing() (set, set) {
 
 	go func() {
 		for true {
-			fileName := fmt.Sprintf("profiled%d.pprof", iterations)
+			fileName := fmt.Sprintf("profiles/%d.pprof", iterations)
 			profile, err := os.Create(fileName)
 			if err != nil {
 				panic(err)
@@ -100,18 +100,6 @@ func addAllNew(transes set, toAdd []transformation) set {
 		transes.add(temptrans)
 	}
 	return transes
-}
-
-func addIfNotContains(transes []transformation, trans transformation) []transformation {
-	resultSlice := make([]transformation, len(transes))
-	copy(resultSlice, transes)
-	for _, tempTrans := range transes {
-		if transEquals(tempTrans, trans) {
-			return resultSlice
-		}
-	}
-	resultSlice = append(resultSlice, trans)
-	return resultSlice
 }
 
 func kiteReplace(trans transformation) ([]transformation, []transformation) {
