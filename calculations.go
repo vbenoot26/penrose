@@ -1,9 +1,24 @@
 package main
 
-import "math"
+import (
+	"fmt"
+	"math"
+	"time"
+)
+
+var startTime time.Time
+
+const maxSecs = 5
+
+type result struct {
+	dartTransforms []transformation
+	kiteTransforms []transformation
+}
 
 func drawPolygons() ([]polygon, []polygon) {
-	dartTransforms, kiteTransforms := iterate([]transformation{{0, coordinate{0, 0}, 0}}, []transformation{})
+	startTime = time.Now()
+	fmt.Printf("maximum seconds: %d\n", maxSecs*time.Second)
+	dartTransforms, kiteTransforms := calculateDrawing()
 	resultDart, resultKite := []polygon{}, []polygon{}
 	for _, trans := range dartTransforms {
 		resultDart = append(resultDart, dart.applyTransformation(trans))
@@ -18,12 +33,29 @@ func drawPolygons() ([]polygon, []polygon) {
 
 var iterations = 0
 
-const maxIterations = 4
+func calculateDrawing() ([]transformation, []transformation) {
+	iterations = 0
 
-func iterate(dartTranses []transformation, kiteTranses []transformation) ([]transformation, []transformation) {
-	if iterations > maxIterations {
-		return dartTranses, kiteTranses
-	}
+	resultChan := make(chan result)
+	stopChan := make(chan struct{})
+	var startTime time.Time
+
+	go func() {
+		startTime = time.Now()
+		iterate([]transformation{{0, coordinate{0, 0}, 0}}, []transformation{}, resultChan, stopChan)
+	}()
+
+	time.Sleep(maxSecs * time.Second)
+
+	close(stopChan)
+	fmt.Println(iterations)
+	fmt.Println(time.Now().Sub(startTime))
+
+	result := <-resultChan
+	return result.dartTransforms, result.kiteTransforms
+}
+
+func iterate(dartTranses []transformation, kiteTranses []transformation, resultChan chan<- result, stopChan <-chan struct{}) {
 	iterations++
 
 	newDartTranses, newKiteTranses := []transformation{}, []transformation{}
@@ -40,7 +72,17 @@ func iterate(dartTranses []transformation, kiteTranses []transformation) ([]tran
 		newKiteTranses = append(newKiteTranses, tempKiteTranses...)
 	}
 
-	return iterate(newDartTranses, newKiteTranses)
+	select {
+	case <-stopChan:
+		return
+
+	default:
+		resultChan <- result{
+			newDartTranses, newKiteTranses,
+		}
+
+		iterate(newDartTranses, newKiteTranses, resultChan, stopChan)
+	}
 }
 
 func kiteReplace(trans transformation) ([]transformation, []transformation) {
