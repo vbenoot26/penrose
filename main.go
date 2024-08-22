@@ -8,10 +8,12 @@ import (
 	svg "github.com/ajstarks/svgo"
 )
 
-var width = 1000
-var heigth = 1000
-var radian36 = math.Pi / 5
-var scaleFactor = math.Phi - 1.0
+const width = 1500
+const heigth = 1000
+const rescale = 400
+
+const radian36 = math.Pi / 5
+const scaleFactor = math.Phi - 1.0
 
 var dart = polygon{
 	[]coordinate{
@@ -68,18 +70,18 @@ func draw(writer http.ResponseWriter, _ *http.Request) {
 }
 
 func drawDart(canvas *svg.SVG, shape polygon) {
-	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:#1a7a4c;stroke:black;stroke-width:1")
+	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:#1a7a4c;stroke:black;stroke-width:2")
 }
 
 func drawKite(canvas *svg.SVG, shape polygon) {
-	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:#101820;stroke:black;stroke-width:1")
+	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:#5580aa;stroke:black;stroke-width:2")
 }
 
 func getXCoords(coordinates []coordinate) []int {
 	result := []int{}
 	for _, coord := range coordinates {
 		x := coord.x
-		result = append(result, int((x*500)+500))
+		result = append(result, int((x*rescale)+(width/2)))
 	}
 	return result
 }
@@ -88,7 +90,7 @@ func getYCoords(coordinates []coordinate) []int {
 	result := []int{}
 	for _, coord := range coordinates {
 		y := coord.y
-		result = append(result, int((y*500)+500))
+		result = append(result, int((y*rescale)+(heigth/2)))
 	}
 	return result
 }

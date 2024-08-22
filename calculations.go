@@ -1,11 +1,8 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"math"
-	"os"
-	"runtime/pprof"
 	"sync"
 	"time"
 )
@@ -45,34 +42,17 @@ const maxIters = 10
 func calculateDrawing() (set, set) {
 	iterations = 0
 
-	ctx, cancel := context.WithTimeout(context.Background(), maxSecs*time.Second)
-	defer cancel()
-
 	darts, kites := newSet(), newSet()
-	darts.add(transformation{0, coordinate{0, 0}, 0})
 
-	go func() {
-		for true {
-			fileName := fmt.Sprintf("profiles/%d.pprof", iterations)
-			profile, err := os.Create(fileName)
-			if err != nil {
-				panic(err)
-			}
-			pprof.StartCPUProfile(profile)
-			darts, kites = calculateNextStep(darts, kites)
-			select {
-			case <-ctx.Done():
-				break
-			default:
-				result.setResults(darts, kites)
-			}
-			pprof.StopCPUProfile()
-		}
-	}()
+	for i := 0; i < 5; i++ {
+		darts.add(transformation{2 * i, coordinate{0, 0}, 0})
+	}
 
-	time.Sleep(maxSecs * time.Second)
-	fmt.Println(iterations)
-	return result.getResults()
+	for i := 0; i < maxIters; i++ {
+		darts, kites = calculateNextStep(darts, kites)
+	}
+
+	return darts, kites
 }
 
 func calculateNextStep(dartTranses set, kiteTranses set) (set, set) {
