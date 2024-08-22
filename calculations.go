@@ -127,4 +127,3 @@ func dartReplace(trans transformation) ([]transformation, []transformation) {
 		combineTransform(trans, transformation{-1, coordinate{0, 0}, 1}),
 	}
 }
-
