@@ -1,24 +1,43 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math"
+	"sync"
 	"time"
 )
 
 var startTime time.Time
 
-const maxSecs = 5
+const maxSecs = 500 * time.Millisecond
 
-type result struct {
+type resultMutex struct {
+	mu             sync.Mutex
 	dartTransforms []transformation
 	kiteTransforms []transformation
 }
 
+var result = resultMutex{dartTransforms: []transformation{}, kiteTransforms: []transformation{}}
+
+func (result *resultMutex) setResults(dartResults []transformation, kiteResults []transformation) {
+	result.mu.Lock()
+	defer result.mu.Unlock()
+
+	result.dartTransforms = dartResults
+	result.kiteTransforms = kiteResults
+}
+
+func (result *resultMutex) getResults() ([]transformation, []transformation) {
+	result.mu.Lock()
+	defer result.mu.Unlock()
+	return result.dartTransforms, result.kiteTransforms
+}
+
 func drawPolygons() ([]polygon, []polygon) {
 	startTime = time.Now()
-	fmt.Printf("maximum seconds: %d\n", maxSecs*time.Second)
 	dartTransforms, kiteTransforms := calculateDrawing()
+	fmt.Println("Calculated!")
 	resultDart, resultKite := []polygon{}, []polygon{}
 	for _, trans := range dartTransforms {
 		resultDart = append(resultDart, dart.applyTransformation(trans))
@@ -36,53 +55,64 @@ var iterations = 0
 func calculateDrawing() ([]transformation, []transformation) {
 	iterations = 0
 
-	resultChan := make(chan result)
-	stopChan := make(chan struct{})
-	var startTime time.Time
+	ctx, cancel := context.WithTimeout(context.Background(), maxSecs*time.Second)
+	defer cancel()
 
 	go func() {
-		startTime = time.Now()
-		iterate([]transformation{{0, coordinate{0, 0}, 0}}, []transformation{}, resultChan, stopChan)
+		iterate([]transformation{{0, coordinate{0, 0}, 0}}, []transformation{}, ctx)
 	}()
 
 	time.Sleep(maxSecs * time.Second)
-
-	close(stopChan)
 	fmt.Println(iterations)
-	fmt.Println(time.Now().Sub(startTime))
-
-	result := <-resultChan
-	return result.dartTransforms, result.kiteTransforms
+	return result.getResults()
 }
 
-func iterate(dartTranses []transformation, kiteTranses []transformation, resultChan chan<- result, stopChan <-chan struct{}) {
+func iterate(dartTranses []transformation, kiteTranses []transformation, ctx context.Context) {
 	iterations++
+	fmt.Println(iterations)
 
 	newDartTranses, newKiteTranses := []transformation{}, []transformation{}
 
 	for _, dartTrans := range dartTranses {
 		tempDartTranses, tempKiteTranses := dartReplace(dartTrans)
-		newDartTranses = append(newDartTranses, tempDartTranses...)
-		newKiteTranses = append(newKiteTranses, tempKiteTranses...)
+		newDartTranses = addAllNew(newDartTranses, tempDartTranses)
+		newKiteTranses = addAllNew(newKiteTranses, tempKiteTranses)
 	}
 
 	for _, kiteTrans := range kiteTranses {
 		tempDartTranses, tempKiteTranses := kiteReplace(kiteTrans)
-		newDartTranses = append(newDartTranses, tempDartTranses...)
-		newKiteTranses = append(newKiteTranses, tempKiteTranses...)
+		newDartTranses = addAllNew(newDartTranses, tempDartTranses)
+		newKiteTranses = addAllNew(newKiteTranses, tempKiteTranses)
 	}
 
 	select {
-	case <-stopChan:
+	case <-ctx.Done():
 		return
 
 	default:
-		resultChan <- result{
-			newDartTranses, newKiteTranses,
-		}
-
-		iterate(newDartTranses, newKiteTranses, resultChan, stopChan)
+		result.setResults(newDartTranses, newKiteTranses)
+		iterate(newDartTranses, newKiteTranses, ctx)
 	}
+}
+
+func addAllNew(transes []transformation, toAdd []transformation) []transformation {
+	resultslice := []transformation{}
+	copy(transes, resultslice)
+	for _, temptrans := range toAdd {
+		resultslice = addIfNotContains(resultslice, temptrans)
+	}
+	return resultslice
+}
+
+func addIfNotContains(transes []transformation, trans transformation) []transformation {
+	resultSlice := []transformation{}
+	copy(resultSlice, transes)
+	for _, tempTrans := range transes {
+		if trans == tempTrans {
+			return resultSlice
+		}
+	}
+	return append(resultSlice, trans)
 }
 
 func kiteReplace(trans transformation) ([]transformation, []transformation) {
