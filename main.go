@@ -7,30 +7,40 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const width = 1500
-const heigth = 1000
-const rescale = 400
+const (
+	width   = 1500
+	heigth  = 1000
+	rescale = 400
 
-const radian36 = math.Pi / 5
-const scaleFactor = math.Phi - 1.0
+	radian36    = math.Pi / 5
+	scaleFactor = math.Phi - 1.0
+)
 
-var dart = polygon{
-	[]coordinate{
-		{0, 0},
-		{math.Cos(radian36), math.Sin(radian36)},
-		{1, 0},
-		{math.Cos(radian36), -math.Sin(radian36)},
-	},
-}
+var (
+	dart = polygon{
+		[]coordinate{
+			{0, 0},
+			{math.Cos(radian36), math.Sin(radian36)},
+			{1, 0},
+			{math.Cos(radian36), -math.Sin(radian36)},
+		},
+	}
 
-var kite = polygon{
-	[]coordinate{
-		{0, 0},
-		{math.Cos(radian36), math.Sin(radian36)},
-		{1 / math.Phi, 0},
-		{math.Cos(radian36), -math.Sin(radian36)},
-	},
-}
+	kite = polygon{
+		[]coordinate{
+			{0, 0},
+			{math.Cos(radian36), math.Sin(radian36)},
+			{1 / math.Phi, 0},
+			{math.Cos(radian36), -math.Sin(radian36)},
+		},
+	}
+
+	idTransform = transformation{
+		amountOfRotation: 0,
+		translation:      coordinate{0, 0},
+		rescales:         0,
+	}
+)
 
 type coordinate struct {
 	x float64
@@ -50,7 +60,6 @@ type polygon struct {
 func main() {
 	ebiten.SetWindowSize(width, heigth)
 	ebiten.SetWindowTitle("Penrose")
-	log.Print("Initted")
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
 	}
