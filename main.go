@@ -60,7 +60,11 @@ type polygon struct {
 func main() {
 	ebiten.SetWindowSize(width, heigth)
 	ebiten.SetWindowTitle("Penrose")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	dartTranses, kiteTranses := calculateDrawing()
+	game := Game{
+		dartTranses, kiteTranses,
+	}
+	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)
 	}
 }

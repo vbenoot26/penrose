@@ -22,13 +22,11 @@ type Game struct {
 func (g *Game) Update() error { return nil }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	dartTranses, kiteTranses := dartReplace(idTransform)
-
-	for _, trans := range dartTranses {
+	for trans := range g.darts.items {
 		drawDart(trans, screen)
 	}
 
-	for _, trans := range kiteTranses {
+	for trans := range g.kites.items {
 		drawKite(trans, screen)
 	}
 }
