@@ -59,7 +59,7 @@ func (coord coordinate) rotate(rotations int) coordinate {
 	return matrixTransform(coord, rotationMatrix)
 }
 
-func (result *resultMutex) setResults(dartResults set, kiteResults set) {
+func (result *resultMutex) setResults(dartResults transSet, kiteResults transSet) {
 	result.mu.Lock()
 	defer result.mu.Unlock()
 
@@ -67,25 +67,25 @@ func (result *resultMutex) setResults(dartResults set, kiteResults set) {
 	result.kiteTransforms = kiteResults
 }
 
-func (result *resultMutex) getResults() (set, set) {
+func (result *resultMutex) getResults() (transSet, transSet) {
 	result.mu.Lock()
 	defer result.mu.Unlock()
 	return result.dartTransforms, result.kiteTransforms
 }
 
-type set struct {
+type transSet struct {
 	items map[transformation]struct{}
 }
 
-func newSet() set {
-	return set{make(map[transformation]struct{})}
+func newSet() transSet {
+	return transSet{make(map[transformation]struct{})}
 }
 
-func (s *set) add(trans transformation) {
+func (s *transSet) add(trans transformation) {
 	s.items[trans] = struct{}{}
 }
 
-func (s *set) contains(trans transformation) bool {
+func (s *transSet) contains(trans transformation) bool {
 	_, exists := s.items[trans]
 	return exists
 }

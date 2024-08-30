@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"math"
-	"net/http"
 
-	svg "github.com/ajstarks/svgo"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 const width = 1500
@@ -49,32 +47,14 @@ type polygon struct {
 }
 
 func main() {
-	http.HandleFunc("/", draw)
-	fmt.Println("Server starting at http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	ebiten.SetWindowSize(width, heigth)
+	ebiten.SetWindowTitle("Penrose")
+	animate(calculateDrawing())
 }
 
-func draw(writer http.ResponseWriter, _ *http.Request) {
-	canvas := svg.New(writer)
-	canvas.Start(width, heigth)
-	defer canvas.End()
+func animate(dartTranses transSet, kiteTranses transSet) {
+	// step 1: ignore input, lets start with drawing a single dart and kite
 
-	dartPolys, kitePolys := drawPolygons()
-	for _, shape := range dartPolys {
-		drawDart(canvas, shape)
-	}
-
-	for _, shape := range kitePolys {
-		drawKite(canvas, shape)
-	}
-}
-
-func drawDart(canvas *svg.SVG, shape polygon) {
-	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:#1a7a4c;stroke:black;stroke-width:2")
-}
-
-func drawKite(canvas *svg.SVG, shape polygon) {
-	canvas.Polygon(getXCoords(shape.points), getYCoords(shape.points), "fill:#5580aa;stroke:black;stroke-width:2")
 }
 
 func getXCoords(coordinates []coordinate) []int {

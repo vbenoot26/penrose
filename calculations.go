@@ -13,8 +13,8 @@ const maxSecs = 5
 
 type resultMutex struct {
 	mu             sync.Mutex
-	dartTransforms set
-	kiteTransforms set
+	dartTransforms transSet
+	kiteTransforms transSet
 }
 
 var result = resultMutex{dartTransforms: newSet(), kiteTransforms: newSet()}
@@ -39,7 +39,7 @@ var iterations = 0
 
 const maxIters = 10
 
-func calculateDrawing() (set, set) {
+func calculateDrawing() (transSet, transSet) {
 	iterations = 0
 
 	darts, kites := newSet(), newSet()
@@ -55,7 +55,7 @@ func calculateDrawing() (set, set) {
 	return darts, kites
 }
 
-func calculateNextStep(dartTranses set, kiteTranses set) (set, set) {
+func calculateNextStep(dartTranses transSet, kiteTranses transSet) (transSet, transSet) {
 	iterations++
 
 	newDartTranses, newKiteTranses := newSet(), newSet()
@@ -75,7 +75,7 @@ func calculateNextStep(dartTranses set, kiteTranses set) (set, set) {
 	return newDartTranses, newKiteTranses
 }
 
-func addAllNew(transes set, toAdd []transformation) set {
+func addAllNew(transes transSet, toAdd []transformation) transSet {
 	for _, temptrans := range toAdd {
 		transes.add(temptrans)
 	}
