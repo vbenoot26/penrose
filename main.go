@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -49,12 +50,10 @@ type polygon struct {
 func main() {
 	ebiten.SetWindowSize(width, heigth)
 	ebiten.SetWindowTitle("Penrose")
-	animate(calculateDrawing())
-}
-
-func animate(dartTranses transSet, kiteTranses transSet) {
-	// step 1: ignore input, lets start with drawing a single dart and kite
-
+	log.Print("Initted")
+	if err := ebiten.RunGame(&Game{}); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getXCoords(coordinates []coordinate) []int {

@@ -43,7 +43,7 @@ func (g Game) Draw(screen *ebiten.Image) {
 	}
 
 	// indices array
-	indices := []uint16{0, 1, 2, 1, 2, 3}
+	indices := []uint16{0, 1, 2, 0, 2, 3}
 
 	screen.DrawTriangles(vertices, indices, whiteImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image), &ebiten.DrawTrianglesOptions{})
 
