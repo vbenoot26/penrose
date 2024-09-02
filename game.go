@@ -24,7 +24,7 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	g.tick = uint32(math.Min(float64(g.tick), animationLength))
+	g.tick = uint32(math.Min(float64(g.tick+1), animationLength))
 	return nil
 }
 

@@ -75,6 +75,16 @@ func (result *resultMutex) getResults() (transSet, transSet) {
 
 type transSet map[transformation]struct{}
 
+func createSet(transes ...transformation) *transSet {
+	result := make(transSet)
+
+	for _, trans := range transes {
+		result.add(trans)
+	}
+
+	return &result
+}
+
 func (s *transSet) add(trans transformation) {
 	(*s)[trans] = struct{}{}
 }
