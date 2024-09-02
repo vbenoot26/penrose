@@ -40,23 +40,24 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	if g.tick >= animationLength {
+	if g.tick >= animationLength-1 {
 		g.currentIteration = (g.currentIteration + 1) % len(g.states)
-		g.tick = -1
 	}
 	g.tick = (g.tick + 1) % animationLength
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	prevState := g.states[g.currentIteration]
+	if g.currentIteration > 0 {
+		prevState := g.states[g.currentIteration-1]
 
-	for trans := range prevState.dartTranses {
-		drawDart(animationLength, trans, screen)
-	}
+		for trans := range prevState.dartTranses {
+			drawDart(animationLength, trans, screen)
+		}
 
-	for trans := range prevState.kiteTranses {
-		drawKite(animationLength, trans, screen)
+		for trans := range prevState.kiteTranses {
+			drawKite(animationLength, trans, screen)
+		}
 	}
 
 	currentState := g.states[g.currentIteration]
