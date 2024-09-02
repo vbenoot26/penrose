@@ -13,7 +13,7 @@ func (shape *polygon) applyTransformation(transform transformation) polygon {
 
 func applyTransformation(coord coordinate, transform transformation) coordinate {
 	// rescales
-	newCoord := coord.scale(transform.rescales)
+	newCoord := coord.scaleByFactor(transform.rescales)
 
 	// rotation
 	newCoord = newCoord.rotate(transform.amountOfRotation)
@@ -42,11 +42,12 @@ func combineTransform(transFirst transformation, transSecond transformation) tra
 	}
 }
 
-func (coord coordinate) scale(scaleExp int) coordinate {
-	return coordinate{
-		coord.x * math.Pow(scaleFactor, float64(scaleExp)),
-		coord.y * math.Pow(scaleFactor, float64(scaleExp)),
-	}
+func (coord coordinate) scaleByFactor(scaleExp int) coordinate {
+	return coord.scale(math.Pow(scaleFactor, float64(scaleExp)))
+}
+
+func (coord coordinate) scale(factor float64) coordinate {
+	return coordinate{coord.x * factor, coord.y * factor}
 }
 
 func (coord coordinate) rotate(rotations int) coordinate {

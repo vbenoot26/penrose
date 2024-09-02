@@ -94,41 +94,30 @@ func (tile polygon) draw(color color.NRGBA, screen *ebiten.Image) {
 }
 
 func getDartCos(tick int) *polygon {
-	animationStep := float64(tick) / animationLength
-	pointAngle := radian36
+	pointAngle := float64(tick) / float64(animationLength) * radian36
 
-	basicCos := []coordinate{
-		{0, 0},
-		{math.Cos(pointAngle), math.Sin(pointAngle)},
-		{1, 0},
-		{math.Cos(pointAngle), (-math.Sin(pointAngle))},
+	return &polygon{
+		[]coordinate{
+			{0, 0},
+			{math.Cos(pointAngle), math.Sin(pointAngle)},
+			{1, 0},
+			{math.Cos(pointAngle), -math.Sin(pointAngle)},
+		},
 	}
-
-	resultcos := []coordinate{}
-	for _, co := range basicCos {
-		resultcos = append(resultcos, co.scale(animationStep))
-	}
-
-	return &polygon{resultcos}
 }
 
 func getKiteCos(tick int) *polygon {
 	animationStep := float64(tick) / animationLength
 	pointAngle := radian36
 
-	basicCos := []coordinate{
-		{0, 0},
-		{math.Cos(pointAngle), math.Sin(pointAngle)},
-		{1 / math.Phi, 0},
-		{math.Cos(pointAngle), (-math.Sin(pointAngle))},
+	return &polygon{
+		[]coordinate{
+			{0, 0},
+			{animationStep * math.Cos(pointAngle), animationStep * math.Sin(pointAngle)},
+			{1 / math.Phi, 0},
+			{animationStep * math.Cos(pointAngle), animationStep * (-math.Sin(pointAngle))},
+		},
 	}
-
-	resultcos := []coordinate{}
-	for _, co := range basicCos {
-		resultcos = append(resultcos, co.scale(animationStep))
-	}
-
-	return &polygon{resultcos}
 }
 
 func (co *coordinate) toVertex(color color.NRGBA) ebiten.Vertex {

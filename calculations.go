@@ -18,22 +18,6 @@ type resultMutex struct {
 
 var result = resultMutex{dartTransforms: make(transSet), kiteTransforms: make(transSet)}
 
-// func drawPolygons() ([]polygon, []polygon) {
-// 	startTime = time.Now()
-// 	dartTransforms, kiteTransforms := calculateDrawings()
-// 	fmt.Println("Calculated!")
-// 	resultDart, resultKite := []polygon{}, []polygon{}
-// 	for trans := range dartTransforms {
-// 		resultDart = append(resultDart, dart.applyTransformation(trans))
-// 	}
-//
-// 	for trans := range kiteTransforms {
-// 		resultKite = append(resultKite, kite.applyTransformation(trans))
-// 	}
-//
-// 	return resultDart, resultKite
-// }
-
 var iterations = 0
 
 const maxIters = 10
@@ -41,11 +25,7 @@ const maxIters = 10
 func calculateDrawings() []state {
 	iterations = 0
 
-	darts, kites := make(transSet), make(transSet)
-
-	for i := 0; i < 5; i++ {
-		darts.add(transformation{2 * i, coordinate{0, 0}, 0})
-	}
+	darts, kites := *createSet(idTransform), make(transSet)
 
 	result := []state{{darts, kites}}
 	for i := 0; i < maxIters; i++ {
@@ -93,8 +73,8 @@ func kiteReplace(trans transformation) ([]transformation, []transformation) {
 	}
 
 	basicKiteReplace := []transformation{
-		{6, kiteTranslate1.scale(trans.rescales).rotate(trans.amountOfRotation), 1},
-		{-6, kiteTranslate2.scale(trans.rescales).rotate(trans.amountOfRotation), 1},
+		{6, kiteTranslate1.scaleByFactor(trans.rescales).rotate(trans.amountOfRotation), 1},
+		{-6, kiteTranslate2.scaleByFactor(trans.rescales).rotate(trans.amountOfRotation), 1},
 	}
 
 	kiteReplaceTrans := []transformation{}
@@ -112,8 +92,8 @@ func dartReplace(trans transformation) ([]transformation, []transformation) {
 	dartTrans2 := coordinate{1 - math.Cos(-dartAngle), -math.Sin(-dartAngle)}
 
 	basicDartTrans := []transformation{
-		{3, dartTrans1.scale(trans.rescales + 1).rotate(trans.amountOfRotation), 1},
-		{-3, dartTrans2.scale(trans.rescales + 1).rotate(trans.amountOfRotation), 1},
+		{3, dartTrans1.scaleByFactor(trans.rescales + 1).rotate(trans.amountOfRotation), 1},
+		{-3, dartTrans2.scaleByFactor(trans.rescales + 1).rotate(trans.amountOfRotation), 1},
 	}
 
 	dartTranses := []transformation{}
