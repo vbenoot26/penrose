@@ -62,7 +62,7 @@ func main() {
 	ebiten.SetWindowTitle("Penrose")
 	dartTranses, kiteTranses := calculateDrawing()
 	game := Game{
-		dartTranses, kiteTranses,
+		transformation, kiteTranses, 0,
 	}
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)
