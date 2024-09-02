@@ -24,16 +24,16 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	g.tick++
+	g.tick = uint32(math.Min(float64(g.tick), animationLength))
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	for trans := range g.darts.items {
+	for trans := range g.darts {
 		getDartCos(g.tick).applyTransformation(trans).draw(screen)
 	}
 
-	for trans := range g.kites.items {
+	for trans := range g.kites {
 		getKiteCos(g.tick).applyTransformation(trans).draw(screen)
 	}
 }

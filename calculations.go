@@ -17,18 +17,18 @@ type resultMutex struct {
 	kiteTransforms transSet
 }
 
-var result = resultMutex{dartTransforms: newSet(), kiteTransforms: newSet()}
+var result = resultMutex{dartTransforms: make(transSet), kiteTransforms: make(transSet)}
 
 func drawPolygons() ([]polygon, []polygon) {
 	startTime = time.Now()
 	dartTransforms, kiteTransforms := calculateDrawing()
 	fmt.Println("Calculated!")
 	resultDart, resultKite := []polygon{}, []polygon{}
-	for trans := range dartTransforms.items {
+	for trans := range dartTransforms {
 		resultDart = append(resultDart, dart.applyTransformation(trans))
 	}
 
-	for trans := range kiteTransforms.items {
+	for trans := range kiteTransforms {
 		resultKite = append(resultKite, kite.applyTransformation(trans))
 	}
 
@@ -42,7 +42,7 @@ const maxIters = 10
 func calculateDrawing() (transSet, transSet) {
 	iterations = 0
 
-	darts, kites := newSet(), newSet()
+	darts, kites := make(transSet), make(transSet)
 
 	for i := 0; i < 5; i++ {
 		darts.add(transformation{2 * i, coordinate{0, 0}, 0})
@@ -58,15 +58,15 @@ func calculateDrawing() (transSet, transSet) {
 func calculateNextStep(dartTranses transSet, kiteTranses transSet) (transSet, transSet) {
 	iterations++
 
-	newDartTranses, newKiteTranses := newSet(), newSet()
+	newDartTranses, newKiteTranses := make(transSet), make(transSet)
 
-	for dartTrans := range dartTranses.items {
+	for dartTrans := range dartTranses {
 		tempDartTranses, tempKiteTranses := dartReplace(dartTrans)
 		newDartTranses = addAllNew(newDartTranses, tempDartTranses)
 		newKiteTranses = addAllNew(newKiteTranses, tempKiteTranses)
 	}
 
-	for kiteTrans := range kiteTranses.items {
+	for kiteTrans := range kiteTranses {
 		tempDartTranses, tempKiteTranses := kiteReplace(kiteTrans)
 		newDartTranses = addAllNew(newDartTranses, tempDartTranses)
 		newKiteTranses = addAllNew(newKiteTranses, tempKiteTranses)

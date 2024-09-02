@@ -73,19 +73,8 @@ func (result *resultMutex) getResults() (transSet, transSet) {
 	return result.dartTransforms, result.kiteTransforms
 }
 
-type transSet struct {
-	items map[transformation]struct{}
-}
-
-func newSet() transSet {
-	return transSet{make(map[transformation]struct{})}
-}
+type transSet map[transformation]struct{}
 
 func (s *transSet) add(trans transformation) {
-	s.items[trans] = struct{}{}
-}
-
-func (s *transSet) contains(trans transformation) bool {
-	_, exists := s.items[trans]
-	return exists
+	(*s)[trans] = struct{}{}
 }
