@@ -57,12 +57,17 @@ type polygon struct {
 	points []coordinate
 }
 
+type state struct {
+	dartTranses transSet
+	kiteTranses transSet
+}
+
 func main() {
 	ebiten.SetWindowSize(width, heigth)
 	ebiten.SetWindowTitle("Penrose")
 	// dartTranses, kiteTranses := calculateDrawing()
 	game := Game{
-		transSet{}, *createSet(idTransform), 0,
+		calculateDrawings(), 0, 0,
 	}
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)

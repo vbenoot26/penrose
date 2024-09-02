@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"sync"
 	"time"
@@ -19,27 +18,27 @@ type resultMutex struct {
 
 var result = resultMutex{dartTransforms: make(transSet), kiteTransforms: make(transSet)}
 
-func drawPolygons() ([]polygon, []polygon) {
-	startTime = time.Now()
-	dartTransforms, kiteTransforms := calculateDrawing()
-	fmt.Println("Calculated!")
-	resultDart, resultKite := []polygon{}, []polygon{}
-	for trans := range dartTransforms {
-		resultDart = append(resultDart, dart.applyTransformation(trans))
-	}
-
-	for trans := range kiteTransforms {
-		resultKite = append(resultKite, kite.applyTransformation(trans))
-	}
-
-	return resultDart, resultKite
-}
+// func drawPolygons() ([]polygon, []polygon) {
+// 	startTime = time.Now()
+// 	dartTransforms, kiteTransforms := calculateDrawings()
+// 	fmt.Println("Calculated!")
+// 	resultDart, resultKite := []polygon{}, []polygon{}
+// 	for trans := range dartTransforms {
+// 		resultDart = append(resultDart, dart.applyTransformation(trans))
+// 	}
+//
+// 	for trans := range kiteTransforms {
+// 		resultKite = append(resultKite, kite.applyTransformation(trans))
+// 	}
+//
+// 	return resultDart, resultKite
+// }
 
 var iterations = 0
 
 const maxIters = 10
 
-func calculateDrawing() (transSet, transSet) {
+func calculateDrawings() []state {
 	iterations = 0
 
 	darts, kites := make(transSet), make(transSet)
@@ -48,11 +47,14 @@ func calculateDrawing() (transSet, transSet) {
 		darts.add(transformation{2 * i, coordinate{0, 0}, 0})
 	}
 
+	result := []state{{darts, kites}}
 	for i := 0; i < maxIters; i++ {
+		newDarts, newKites := calculateNextStep(result[i].dartTranses, result[i].kiteTranses)
+		result = append(result, state{newDarts, newKites})
 		darts, kites = calculateNextStep(darts, kites)
 	}
 
-	return darts, kites
+	return result
 }
 
 func calculateNextStep(dartTranses transSet, kiteTranses transSet) (transSet, transSet) {

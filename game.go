@@ -10,18 +10,14 @@ import (
 
 var (
 	whiteImage = ebiten.NewImage(3, 3)
-	dartColor  = color.NRGBA{
+
+	dartColor = color.NRGBA{
 		R: 238,
 		G: 223,
 		B: 226,
 		A: 255,
 	}
-	// kiteColor = color.NRGBA{
-	// 	R: 159,
-	// 	G: 193,
-	// 	B: 49,
-	// 	A: 255,
-	// }
+
 	kiteColor = color.NRGBA{
 		R: 159,
 		G: 193,
@@ -38,24 +34,47 @@ func init() {
 
 // A file to keep track of all the game logic.
 type Game struct {
-	darts transSet
-	kites transSet
-	tick  uint32
+	states           []state
+	currentIteration int
+	tick             int
 }
 
 func (g *Game) Update() error {
-	g.tick = uint32(math.Min(float64(g.tick+1), animationLength))
+	if g.tick >= animationLength {
+		g.currentIteration = (g.currentIteration + 1) % len(g.states)
+		g.tick = -1
+	}
+	g.tick = (g.tick + 1) % animationLength
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	for trans := range g.darts {
-		getDartCos(g.tick).applyTransformation(trans).draw(dartColor, screen)
+	prevState := g.states[g.currentIteration]
+
+	for trans := range prevState.dartTranses {
+		drawDart(animationLength, trans, screen)
 	}
 
-	for trans := range g.kites {
-		getKiteCos(g.tick).applyTransformation(trans).draw(kiteColor, screen)
+	for trans := range prevState.kiteTranses {
+		drawKite(animationLength, trans, screen)
 	}
+
+	currentState := g.states[g.currentIteration]
+	for trans := range currentState.dartTranses {
+		drawDart(g.tick, trans, screen)
+	}
+
+	for trans := range currentState.kiteTranses {
+		drawKite(g.tick, trans, screen)
+	}
+}
+
+func drawDart(tick int, trans transformation, screen *ebiten.Image) {
+	getDartCos(tick).applyTransformation(trans).draw(dartColor, screen)
+}
+
+func drawKite(tick int, trans transformation, screen *ebiten.Image) {
+	getKiteCos(tick).applyTransformation(trans).draw(kiteColor, screen)
 }
 
 // We presume that the reciever is either a variant of a kite or a dart. This is important for the way the triangles are drawn.
@@ -73,7 +92,7 @@ func (tile polygon) draw(color color.NRGBA, screen *ebiten.Image) {
 	screen.DrawTriangles(vertices, indices, whiteImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image), &ebiten.DrawTrianglesOptions{})
 }
 
-func getDartCos(tick uint32) *polygon {
+func getDartCos(tick int) *polygon {
 	pointAngle := float64(tick) / float64(animationLength) * radian36
 
 	return &polygon{
@@ -86,7 +105,7 @@ func getDartCos(tick uint32) *polygon {
 	}
 }
 
-func getKiteCos(tick uint32) *polygon {
+func getKiteCos(tick int) *polygon {
 	pointAngle := float64(tick) / float64(animationLength) * radian36
 
 	return &polygon{
