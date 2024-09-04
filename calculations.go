@@ -25,7 +25,7 @@ const maxIters = 10
 func calculateDrawings() []state {
 	iterations = 0
 
-	darts, kites := *createSet(idTransform), make(transSet)
+	darts, kites := initSun()
 
 	result := []state{{darts, kites}}
 	for i := 0; i < maxIters; i++ {
@@ -35,6 +35,24 @@ func calculateDrawings() []state {
 	}
 
 	return result
+}
+
+func initDart() (transSet, transSet) {
+	return *createSet(idTransform), make(transSet)
+}
+
+func initKite() (transSet, transSet) {
+	return make(transSet), *createSet(idTransform)
+}
+
+func initSun() (transSet, transSet) {
+	darts, kites := make(transSet), make(transSet)
+
+	for i := 0; i < 5; i++ {
+		darts.add(transformation{2 * i, coordinate{0, 0}, 0})
+	}
+
+	return darts, kites
 }
 
 func calculateNextStep(dartTranses transSet, kiteTranses transSet) (transSet, transSet) {

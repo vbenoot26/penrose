@@ -71,11 +71,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func drawDart(tick int, trans transformation, screen *ebiten.Image) {
-	getDartCos(tick).applyTransformation(trans).draw(dartColor, screen)
+	dart.getRescaledOnTick(tick).applyTransformation(trans).draw(dartColor, screen)
 }
 
 func drawKite(tick int, trans transformation, screen *ebiten.Image) {
-	getKiteCos(tick).applyTransformation(trans).draw(kiteColor, screen)
+	kite.getRescaledOnTick(tick).applyTransformation(trans).draw(kiteColor, screen)
 }
 
 // We presume that the reciever is either a variant of a kite or a dart. This is important for the way the triangles are drawn.
@@ -93,16 +93,10 @@ func (tile polygon) draw(color color.NRGBA, screen *ebiten.Image) {
 	screen.DrawTriangles(vertices, indices, whiteImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image), &ebiten.DrawTrianglesOptions{})
 }
 
-func getDartCos(tick int) *polygon {
-	animationStep := float64(tick) / animationLength
-	pointAngle := radian36
+func (poly *polygon) getRescaledOnTick(tick int) *polygon {
+	animationStep := expSmooth(float64(tick) / animationLength)
 
-	basicCos := []coordinate{
-		{0, 0},
-		{math.Cos(pointAngle), math.Sin(pointAngle)},
-		{1, 0},
-		{math.Cos(pointAngle), (-math.Sin(pointAngle))},
-	}
+	basicCos := poly.points
 
 	resultcos := []coordinate{}
 	for _, co := range basicCos {
@@ -112,23 +106,21 @@ func getDartCos(tick int) *polygon {
 	return &polygon{resultcos}
 }
 
-func getKiteCos(tick int) *polygon {
-	animationStep := float64(tick) / animationLength
-	pointAngle := radian36
+func getSmoothingStep(tick int) float64 {
+	return 1 - math.Pow(math.E, -float64(tick))
+}
 
-	basicCos := []coordinate{
-		{0, 0},
-		{math.Cos(pointAngle), math.Sin(pointAngle)},
-		{1 / math.Phi, 0},
-		{math.Cos(pointAngle), (-math.Sin(pointAngle))},
-	}
+func linearSmooth(animationPart float64) float64 {
+	return animationPart
+}
 
-	resultcos := []coordinate{}
-	for _, co := range basicCos {
-		resultcos = append(resultcos, co.scale(animationStep))
-	}
+func expSmooth(animationPart float64) float64 {
+	speed := 10
+	return 1 - math.Pow(math.E, -animationPart*float64(speed))
+}
 
-	return &polygon{resultcos}
+func sqrtSmooth(animationPart float64) float64 {
+	return 1 - math.Sqrt(1-animationPart)
 }
 
 func (co *coordinate) toVertex(color color.NRGBA) ebiten.Vertex {
