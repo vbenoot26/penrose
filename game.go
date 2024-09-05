@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 var (
@@ -88,11 +89,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func drawDart(tick int, trans transformation, screen *ebiten.Image) {
-	dart.getRescaledOnTick(tick).applyTransformation(trans).draw(dartColor, screen)
+	transformed := dart.getRescaledOnTick(tick).applyTransformation(trans)
+	transformed.draw(dartColor, screen)
+	transformed.drawBorder(screen)
 }
 
 func drawKite(tick int, trans transformation, screen *ebiten.Image) {
-	kite.getRescaledOnTick(tick).applyTransformation(trans).draw(kiteColor, screen)
+	transformed := kite.getRescaledOnTick(tick).applyTransformation(trans)
+	transformed.draw(kiteColor, screen)
+	transformed.drawBorder(screen)
 }
 
 // We presume that the reciever is either a variant of a kite or a dart. This is important for the way the triangles are drawn.
@@ -108,6 +113,14 @@ func (tile polygon) draw(color color.NRGBA, screen *ebiten.Image) {
 	indices := []uint16{0, 1, 2, 0, 2, 3}
 
 	screen.DrawTriangles(vertices, indices, whiteImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image), &ebiten.DrawTrianglesOptions{})
+}
+
+func (tile polygon) drawBorder(screen *ebiten.Image) {
+	for i := range tile {
+		currentCo := tile[i]
+		nextCo := tile[(i+1)%len(tile)]
+		vector.StrokeLine(screen, getXCo(currentCo), getYCo(currentCo), getXCo(nextCo), getYCo(nextCo), 1, color.Black, true)
+	}
 }
 
 func (poly *polygon) getRescaledOnTick(tick int) *polygon {
@@ -132,7 +145,7 @@ func linearSmooth(animationPart float64) float64 {
 }
 
 func expSmooth(animationPart float64) float64 {
-	speed := 20
+	speed := 10
 	return 1 - math.Pow(math.E, -animationPart*float64(speed))
 }
 
