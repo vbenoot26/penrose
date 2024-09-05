@@ -2,11 +2,13 @@ package main
 
 import (
 	"flag"
+	"image/color"
 	"log"
 	"math"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"gopkg.in/go-playground/colors.v1"
 )
 
 const (
@@ -42,6 +44,9 @@ var (
 	// Options
 	maxIters int
 	borders  bool
+
+	dartColor color.NRGBA
+	kiteColor color.NRGBA
 )
 
 type coordinate struct {
@@ -75,14 +80,36 @@ func main() {
 }
 
 func initArgs() {
+	var kiteHex, dartHex string
+
 	flag.BoolVar(&borders, "borders", false, "Turns borders on")
+	flag.StringVar(&dartHex, "dartColor", "#eedfe2", "Define the color of a dart in hex")
+	flag.StringVar(&kiteHex, "kiteColor", "#9fc131", "Define the color of a kite in hex")
 	flag.Parse()
+
+	dartColor = getColor(dartHex)
+	kiteColor = getColor(kiteHex)
 
 	itersInput, err := strconv.Atoi(flag.Arg(0))
 	if err != nil {
 		log.Fatal("Something went wrong converting the input to an int")
 	}
 	maxIters = itersInput
+}
+
+func getColor(hexStr string) color.NRGBA {
+	hexCol, err := colors.ParseHEX(hexStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rgbColors := hexCol.ToRGBA()
+	return color.NRGBA{
+		R: rgbColors.R,
+		B: rgbColors.B,
+		G: rgbColors.G,
+		A: 255,
+	}
 
 }
 

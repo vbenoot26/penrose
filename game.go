@@ -25,20 +25,6 @@ var (
 		B: 99,
 		A: 255,
 	}
-
-	dartColor = color.NRGBA{
-		R: 238,
-		G: 223,
-		B: 226,
-		A: 255,
-	}
-
-	kiteColor = color.NRGBA{
-		R: 159,
-		G: 193,
-		B: 49,
-		A: 255,
-	}
 )
 
 const animationLength = 60

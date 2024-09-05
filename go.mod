@@ -18,4 +18,5 @@ require (
 	golang.org/x/mobile v0.0.0-20210208171126-f462b3930c8f // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
+	gopkg.in/go-playground/colors.v1 v1.2.0 // indirect
 )
