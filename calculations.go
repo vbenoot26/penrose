@@ -20,12 +20,12 @@ var result = resultMutex{dartTransforms: make(transSet), kiteTransforms: make(tr
 
 var iterations = 0
 
-const maxIters = 10
+const maxIters = 9
 
 func calculateDrawings() []state {
 	iterations = 0
 
-	darts, kites := initSun()
+	darts, kites := initDart()
 
 	result := []state{{darts, kites}}
 	for i := 0; i < maxIters; i++ {

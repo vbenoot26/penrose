@@ -18,21 +18,17 @@ const (
 
 var (
 	dart = polygon{
-		[]coordinate{
-			{0, 0},
-			{math.Cos(radian36), math.Sin(radian36)},
-			{1, 0},
-			{math.Cos(radian36), -math.Sin(radian36)},
-		},
+		{0, 0},
+		{math.Cos(radian36), math.Sin(radian36)},
+		{1, 0},
+		{math.Cos(radian36), -math.Sin(radian36)},
 	}
 
 	kite = polygon{
-		[]coordinate{
-			{0, 0},
-			{math.Cos(radian36), math.Sin(radian36)},
-			{1 / math.Phi, 0},
-			{math.Cos(radian36), -math.Sin(radian36)},
-		},
+		{0, 0},
+		{math.Cos(radian36), math.Sin(radian36)},
+		{1 / math.Phi, 0},
+		{math.Cos(radian36), -math.Sin(radian36)},
 	}
 
 	idTransform = transformation{
@@ -53,9 +49,7 @@ type transformation struct {
 	rescales         int // rescales will always happen with the same factor: see scalefactor
 }
 
-type polygon struct {
-	points []coordinate
-}
+type polygon []coordinate
 
 type state struct {
 	dartTranses transSet

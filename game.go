@@ -11,6 +11,20 @@ import (
 var (
 	whiteImage = ebiten.NewImage(3, 3)
 
+	emilieDartColor = color.NRGBA{
+		R: 45,
+		G: 41,
+		B: 38,
+		A: 255,
+	}
+
+	emilieKiteColor = color.NRGBA{
+		R: 237,
+		G: 111,
+		B: 99,
+		A: 255,
+	}
+
 	dartColor = color.NRGBA{
 		R: 238,
 		G: 223,
@@ -40,8 +54,11 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
+	if g.currentIteration >= maxIters {
+		return nil
+	}
 	if g.tick >= animationLength-1 {
-		g.currentIteration = (g.currentIteration + 1) % len(g.states)
+		g.currentIteration++
 	}
 	g.tick = (g.tick + 1) % animationLength
 	return nil
@@ -83,7 +100,7 @@ func (tile polygon) draw(color color.NRGBA, screen *ebiten.Image) {
 	// coordinates to vertices
 	vertices := []ebiten.Vertex{}
 
-	for _, co := range tile.points {
+	for _, co := range tile {
 		vertices = append(vertices, co.toVertex(color))
 	}
 
@@ -96,14 +113,14 @@ func (tile polygon) draw(color color.NRGBA, screen *ebiten.Image) {
 func (poly *polygon) getRescaledOnTick(tick int) *polygon {
 	animationStep := expSmooth(float64(tick) / animationLength)
 
-	basicCos := poly.points
+	basicCos := poly
 
-	resultcos := []coordinate{}
-	for _, co := range basicCos {
+	resultcos := polygon{}
+	for _, co := range *basicCos {
 		resultcos = append(resultcos, co.scale(animationStep))
 	}
 
-	return &polygon{resultcos}
+	return &resultcos
 }
 
 func getSmoothingStep(tick int) float64 {
@@ -115,7 +132,7 @@ func linearSmooth(animationPart float64) float64 {
 }
 
 func expSmooth(animationPart float64) float64 {
-	speed := 10
+	speed := 20
 	return 1 - math.Pow(math.E, -animationPart*float64(speed))
 }
 

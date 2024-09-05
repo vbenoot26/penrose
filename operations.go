@@ -3,12 +3,12 @@ package main
 import "math"
 
 func (shape *polygon) applyTransformation(transform transformation) polygon {
-	newPoints := []coordinate{}
-	for _, coord := range shape.points {
+	newPolygon := polygon{}
+	for _, coord := range *shape {
 		newPoint := applyTransformation(coord, transform)
-		newPoints = append(newPoints, newPoint)
+		newPolygon = append(newPolygon, newPoint)
 	}
-	return polygon{newPoints}
+	return newPolygon
 }
 
 func applyTransformation(coord coordinate, transform transformation) coordinate {
