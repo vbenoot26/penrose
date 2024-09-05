@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"math"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -36,6 +38,10 @@ var (
 		translation:      coordinate{0, 0},
 		rescales:         0,
 	}
+
+	// Options
+	maxIters int
+	borders  bool
 )
 
 type coordinate struct {
@@ -57,15 +63,27 @@ type state struct {
 }
 
 func main() {
+	initArgs()
 	ebiten.SetWindowSize(width, heigth)
 	ebiten.SetWindowTitle("Penrose")
-	// dartTranses, kiteTranses := calculateDrawing()
 	game := Game{
 		calculateDrawings(), 0, 0,
 	}
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func initArgs() {
+	flag.BoolVar(&borders, "borders", false, "Turns borders on")
+	flag.Parse()
+
+	itersInput, err := strconv.Atoi(flag.Arg(0))
+	if err != nil {
+		log.Fatal("Something went wrong converting the input to an int")
+	}
+	maxIters = itersInput
+
 }
 
 func getXCoords(coordinates []coordinate) []int {

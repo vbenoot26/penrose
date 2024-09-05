@@ -16,11 +16,10 @@ type resultMutex struct {
 	kiteTransforms transSet
 }
 
-var result = resultMutex{dartTransforms: make(transSet), kiteTransforms: make(transSet)}
-
-var iterations = 0
-
-const maxIters = 9
+var (
+	result     = resultMutex{dartTransforms: make(transSet), kiteTransforms: make(transSet)}
+	iterations = 0
+)
 
 func calculateDrawings() []state {
 	iterations = 0

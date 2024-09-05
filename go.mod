@@ -1,6 +1,6 @@
 module github.com/vbenoot/penrose
 
-go 1.22.3
+go 1.23.0
 
 require (
 	github.com/hajimehoshi/ebiten v1.12.12

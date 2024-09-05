@@ -116,6 +116,10 @@ func (tile polygon) draw(color color.NRGBA, screen *ebiten.Image) {
 }
 
 func (tile polygon) drawBorder(screen *ebiten.Image) {
+	if !borders {
+		return
+	}
+
 	for i := range tile {
 		currentCo := tile[i]
 		nextCo := tile[(i+1)%len(tile)]
